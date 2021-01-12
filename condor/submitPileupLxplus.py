@@ -9,11 +9,15 @@ def buildSubmit(infile, workpath, mode, uid, year):
     '''A series of actions to prepare submit dir'''
 
     stageOutPiece = '''
-remoteDIR="/eos/user/a/asterenb/iDM/Samples"
+#remoteDIR="/eos/user/a/asterenb/iDM/Samples"
+remoteDIR="/eos/user/j/jmonroym/iDM/Samples"
 for f in `ls *AOD*.root`; do
-    cmd="xrdcp -vf file:///$PWD/$f root://eosuser.cern.ch/$remoteDIR/$f"
+    cmd="xrdcp -vf $f root://eosuser.cern.ch/$remoteDIR/$f"   # these two lines should be inside the stageoutpiece, I am trying a fix, so take them back if needed. 
     echo $cmd && eval $cmd
 done'''
+    #cmd1="cp -vf $f $remoteDIR/$f"
+    #echo $cmd1 && eval $cmd1
+    
 
     os.makedirs(workpath+'/submit/conf')
     os.system('cp conf/* %s/submit/conf/' % workpath)
@@ -100,7 +104,7 @@ rank = Mips
 request_memory = 4000
 arguments = $(Process)
 +JobFlavour = "tomorrow"
-requirements = (OpSysAndVer =?= "SLCern6")
+#requirements = (OpSysAndVer =?= "SLCern6")
 #on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
 +AcctGroup = "analysis"
 +ProjectName = "DarkMatterSimulation"
@@ -144,6 +148,7 @@ if __name__ == "__main__":
 
     buildSubmit(infile=inf, workpath=Workpath, mode=Mode, uid=Uid, year=year)
     buildExec(infile=inf, workpath=Workpath, mode=Mode, year=year)
+
     theCondor = buildCondor(process=Process, workpath=Workpath,
             logpath=Logpath, uid=Uid, njobs=Njobs)
     os.system('condor_submit %s' % theCondor)
